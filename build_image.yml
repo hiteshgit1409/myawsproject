@@ -1,0 +1,24 @@
+- hosts: localhost
+  tasks:
+          - name: Download packer binaries
+            unarchive:
+               src: " https://releases.hashicorp.com/packer/1.0.0/packer_1.0.0_linux_amd64.zip"
+               remote_src: True
+               dest: /usr/bin
+
+          - name: Set environment
+            lineinfile:
+               dest: /root/.bashrc
+               line: 'export PATH="$PATH:/usr/bin/packer"'
+               state: present
+
+          - name: packer build own AMI
+            command: "packer build -var-file=/root/myproject/vars.json  /root/myproject/template.json"
+            register: ownimg
+            ignore_errors: true
+
+          - copy:
+                  content: "{{ownimg}}"
+                  dest: /root/myproject/ami_id.yml
+
+

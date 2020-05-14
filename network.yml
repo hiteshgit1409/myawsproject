@@ -1,0 +1,14 @@
+- hosts: localhost
+
+  vars_prompt:
+         - name: "aws_access_key"
+           private: true
+           prompt: "Enter your aws access key"
+         - name: "aws_secret_key"
+           prompt: "Enter your aws secret key"
+           private: true
+          
+  roles:
+          - role: network
+            vars:
+                 - include_vars: vars/main.yml

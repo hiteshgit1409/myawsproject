@@ -1,0 +1,15 @@
+{  
+   "aws_access_key": "",
+   "aws_secret_key": "",
+   "region": "ap-south-1",
+   "ami_source_id": "ami-0c79d92cb43d19eab",
+   "instance_type": "t2.micro",
+   "ssh_username": "ec2-user",
+   "own_image_name": "heynewimage",
+   "own_image_desc": "heydescription",
+   "own_image_tag": "heyimgtag",
+   "pub_subnet2_id": "subnet-05cb51b8640aea9b9",
+   "vpc_id": "vpc-0cadd351a527efa84"
+
+}
+

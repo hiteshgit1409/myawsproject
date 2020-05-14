@@ -1,0 +1,21 @@
+---
+# vars file for deployment
+
+sec_grp_name: "ram_security"
+sec_grp_id: "sg-0a127beec7ee0b9da"
+img_id: "ami-02834ec56bd65da6a"
+launch_name: "mylaunch"
+region: "ap-south-1"
+keypair_name: "mykey"
+instance_type: "t2.micro"
+aws_access_key: ""
+aws_secret_key: ""
+asg_name: "myasg"
+desired_instances: "4"
+pri_subnet1_id: "subnet-0ab40e2eb19242fe6"
+pri_subnet2_id: "subnet-04344daf3a02f83db"
+pub_subnet1_id: "subnet-05cb51b8640aea9b9"
+pub_subnet2_id: "subnet-0552ee27e32a7ac9b"
+elb_name: "mynewelb"
+az1: "ap-south-1a"
+az2: "ap-south-2a"

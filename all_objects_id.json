@@ -1,0 +1,13 @@
+
+{
+"pri_subnet1_id": "subnet-0ab40e2eb19242fe6",
+"pri_subnet2_id": "subnet-04344daf3a02f83db",
+"pub_subnet1_id": "subnet-05cb51b8640aea9b9",
+"pub_subnet2_id": "subnet-0552ee27e32a7ac9b",
+"vpc_id": "vpc-0cadd351a527efa84",
+"security_grp_id": "sg-0a127beec7ee0b9da",
+"igw_id": "igw-07f4b395f53ded9bf",
+"pub_routing_id": "rtb-06ab705beed031799",
+"pri_routing_id": "rtb-0ada9ef16197e5ddf",
+"s3_endpoint_id": "vpce-005e6a6cf6086d158"
+}

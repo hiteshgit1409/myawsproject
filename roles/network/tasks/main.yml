@@ -1,0 +1,181 @@
+---
+# tasks file for network
+
+############### VPC CREATION #############################
+
+- name: "..........######create a vpc#####..........."
+  ec2_vpc_net:
+          name: "{{ vpc_name }}"
+          cidr_block: "{{ vpc_cidr_block }}"
+          region: "{{region}}"
+          state: present
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+  register: myvpc
+
+################### PUBLIC SUBNETS CREATION ##########################
+
+- name: "...........######create 1_PUBLIC_subnet #######............"
+  ec2_vpc_subnet:
+          state: present
+          vpc_id: "{{myvpc.vpc.id}}"
+          region: "{{region}}"
+          az: "{{region1}}"
+          cidr: "{{pub_subnet1_cidr}}"
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+          map_public: yes
+          resource_tags:
+               Name: "{{pub_subnet1_name}}"
+  register: pub_subnet1
+  
+
+
+- name: ".........######create 2_PUBLIC_subnet######........"
+  ec2_vpc_subnet:
+          state: present
+          vpc_id: "{{myvpc.vpc.id}}"
+          region: "{{region}}"
+          az: "{{region2}}"
+          cidr: "{{pub_subnet2_cidr}}"
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+          map_public: yes
+          resource_tags:
+               Name: "{{pub_subnet2_name}}"
+  register: pub_subnet2
+
+################ PRIVATE SUBNETS CREATION ################################
+
+- name: "...........######create 1_PRIVATE_subnet #######............"
+  ec2_vpc_subnet:
+          state: present
+          vpc_id: "{{myvpc.vpc.id}}"
+          region: "{{region}}"
+          az: "{{region1}}"
+          cidr: "{{pri_subnet1_cidr}}"
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+          map_public: no
+          resource_tags:
+               Name: "{{pri_subnet1_name}}"
+  register: pri_subnet1
+
+
+- name: ".........######create 2_PRIVATE_subnet######........"
+  ec2_vpc_subnet:
+          state: present
+          vpc_id: "{{myvpc.vpc.id}}"
+          region: "{{region}}"
+          az: "{{region2}}"
+          cidr: "{{pri_subnet2_cidr}}"
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+          map_public: no
+          resource_tags:
+               Name: "{{pri_subnet2_name}}"
+  register: pri_subnet2
+
+
+############## Create a security Group ################# 
+
+- name: Create Security Group
+  ec2_group:
+          name: "{{security_grp_name}}"
+          description: "{{security_grp_des}}"
+          vpc_id: "{{myvpc.vpc.id}}"
+          region: "{{region}}"
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+          rules:
+            - proto: tcp
+              ports:
+               - 22
+              cidr_ip: 0.0.0.0/0
+            - proto: tcp
+              ports:
+               - 80
+               - 443
+              cidr_ip: 0.0.0.0/0
+  register: security_grp
+
+################### Create Internet Gateway #####################
+
+- name: creating the internet gateway
+  ec2_vpc_igw:
+          vpc_id: "{{myvpc.vpc.id}}"
+          region: "{{region}}"
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+          state: "present"
+          tags:
+                  Name: "{{ig_gateway_name}}"
+  register: myigw
+ 
+
+################### Create Routing Table #####################
+- name: Create public Routing table IGW
+  ec2_vpc_route_table:
+          vpc_id: "{{myvpc.vpc.id}}"
+          region: "{{region}}"
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+          subnets:
+              - "{{pub_subnet1.subnet.id}}"
+              - "{{pub_subnet2.subnet.id}}"
+          routes:
+              - dest: 0.0.0.0/0
+                gateway_id: "{{myigw.gateway_id}}"
+          tags:
+                Name: "{{pub_routing_table_name}}"
+  register: pub_routing
+          
+- name: Create private Routing table IGW
+  ec2_vpc_route_table:
+          vpc_id: "{{myvpc.vpc.id}}"
+          region: "{{region}}"
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+          subnets:
+              - "{{pri_subnet1.subnet.id}}"
+              - "{{pri_subnet2.subnet.id}}"
+          tags:
+                Name: "{{pri_routing_table_name}}"
+  register: pri_routing
+
+############## Private Subnet have S3 VPC endpoint #################
+
+- name: Create new vpc endpoint
+  ec2_vpc_endpoint:
+          state: present
+          region: "{{region}}"
+          vpc_id: "{{myvpc.vpc.id}}"
+          service: com.amazonaws.ap-south-1.s3
+          aws_access_key: "{{aws_access_key}}"
+          aws_secret_key: "{{aws_secret_key}}"
+          route_table_ids:
+              - "{{pri_routing.route_table.id}}"
+  register: new_vpc_endpoint
+
+          
+############# store All objects ID in one specfic file###############
+- command: echo "" > /$HOME/myproject/all_objects_id.json
+- name: store all ID in one file
+  lineinfile:
+          path: /$HOME/myproject/all_objects_id.json
+          line: "{{item}}"
+  with_items:
+          - '{'
+          - '"pri_subnet1_id": "{{pri_subnet1.subnet.id}}",'
+          - '"pri_subnet2_id": "{{pri_subnet2.subnet.id}}",'
+          - '"pub_subnet1_id": "{{pub_subnet1.subnet.id}}",'
+          - '"pub_subnet2_id": "{{pub_subnet2.subnet.id}}",'
+          - '"vpc_id": "{{myvpc.vpc.id}}",'
+          - '"security_grp_id": "{{security_grp.group_id}}",'
+          - '"igw_id": "{{myigw.gateway_id}}",'
+          - '"pub_routing_id": "{{pub_routing.route_table.id}}",'
+          - '"pri_routing_id": "{{pri_routing.route_table.id}}",'
+          - '"s3_endpoint_id": "{{new_vpc_endpoint.result.vpc_endpoint_id}}"'
+          - '}'
+
+

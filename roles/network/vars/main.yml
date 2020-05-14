@@ -1,0 +1,30 @@
+
+               vpc_name: "ramvpc"
+               vpc_cidr_block: "192.168.0.0/16"
+               region: "ap-south-1"
+               region1: "ap-south-1a"
+               region2: "ap-south-1b"
+               
+               ###### subnets with 64 IPs #######
+
+               pub_subnet1_cidr: "192.168.1.0/26"
+               pub_subnet1_name: "ram_pub1_subnet"
+
+               pub_subnet2_cidr: "192.168.2.0/26"
+               pub_subnet2_name: "ram_pub2_subnet"
+          
+               pri_subnet1_cidr: "192.168.3.0/26"
+               pri_subnet1_name: "ram_pri1_subnet"
+
+               pri_subnet2_cidr: "192.168.4.0/26"
+               pri_subnet2_name: "ram_pri2_subnet"
+
+               security_grp_name: "ram_security"
+               security_grp_des: "my_security"
+
+               ig_gateway_name: "ram_gateway"
+               pub_routing_table_name: "ram_pub_routing"
+
+               pri_routing_table_name: "ram_pri_routing"
+
+
